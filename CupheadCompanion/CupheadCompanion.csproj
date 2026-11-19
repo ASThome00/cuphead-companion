@@ -1,0 +1,52 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Where Cuphead is installed. Set it in one of these ways (first match wins):
+      1. dotnet build -p:GameDir="D:\Games\Cuphead"
+      2. a GameDir.props file next to this project (not committed; see GameDir.props.example)
+      3. the CUPHEAD_DIR environment variable
+      4. the default Steam location below
+  -->
+  <Import Project="GameDir.props" Condition="Exists('GameDir.props')" />
+
+  <PropertyGroup>
+    <!-- Cuphead runs on Unity 2017.4 with the .NET 3.5-class Mono runtime -->
+    <TargetFramework>net35</TargetFramework>
+    <AssemblyName>CupheadCompanion</AssemblyName>
+    <RootNamespace>CupheadCompanion</RootNamespace>
+    <Version>1.0.0</Version>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <GameDir Condition="'$(GameDir)' == '' And '$(CUPHEAD_DIR)' != ''">$(CUPHEAD_DIR)</GameDir>
+    <GameDir Condition="'$(GameDir)' == ''">C:\Program Files (x86)\Steam\steamapps\common\Cuphead</GameDir>
+    <Managed>$(GameDir)\Cuphead_Data\Managed</Managed>
+    <!-- Set to false to build without copying the plugin into the game folder -->
+    <DeployToGame Condition="'$(DeployToGame)' == ''">true</DeployToGame>
+  </PropertyGroup>
+
+  <Target Name="CheckGameDir" BeforeTargets="ResolveAssemblyReferences">
+    <Error Condition="!Exists('$(Managed)\Assembly-CSharp.dll')"
+           Text="Cuphead was not found at '$(GameDir)'. Set GameDir (see the comment at the top of CupheadCompanion.csproj)." />
+    <Error Condition="!Exists('$(GameDir)\BepInEx\core\BepInEx.dll')"
+           Text="BepInEx 5 was not found in '$(GameDir)'. Install it into the game folder first." />
+  </Target>
+
+  <!-- The game's and BepInEx's own libraries are referenced from the install; none are redistributed. -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+    <Reference Include="BepInEx"><HintPath>$(GameDir)\BepInEx\core\BepInEx.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="0Harmony"><HintPath>$(GameDir)\BepInEx\core\0Harmony.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Assembly-CSharp"><HintPath>$(Managed)\Assembly-CSharp.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine"><HintPath>$(Managed)\UnityEngine.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.CoreModule"><HintPath>$(Managed)\UnityEngine.CoreModule.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.UI"><HintPath>$(Managed)\UnityEngine.UI.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.UIModule"><HintPath>$(Managed)\UnityEngine.UIModule.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.TextRenderingModule"><HintPath>$(Managed)\UnityEngine.TextRenderingModule.dll</HintPath><Private>false</Private></Reference>
+  </ItemGroup>
+
+  <!-- Copy the built plugin into the game's BepInEx plugins folder (the game must be closed) -->
+  <Target Name="DeployToGame" AfterTargets="Build" Condition="'$(DeployToGame)' == 'true'">
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(GameDir)\BepInEx\plugins\CupheadCompanion" />
+  </Target>
+
+</Project>

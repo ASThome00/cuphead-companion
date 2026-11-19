@@ -1,0 +1,10 @@
+# Build output
+bin/
+obj/
+dist/
+
+# Machine-specific: where Cuphead is installed (see GameDir.props.example)
+CupheadCompanion/GameDir.props
+
+# Private working notes
+ROADMAP.md

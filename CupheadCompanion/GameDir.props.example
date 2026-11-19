@@ -1,0 +1,6 @@
+<Project>
+  <!-- Copy this file to GameDir.props and point it at your Cuphead install folder. -->
+  <PropertyGroup>
+    <GameDir Condition="'$(GameDir)' == ''">D:\SteamLibrary\steamapps\common\Cuphead</GameDir>
+  </PropertyGroup>
+</Project>
