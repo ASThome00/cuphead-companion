@@ -11,7 +11,7 @@ namespace CupheadCompanion
     internal static class ProgressPanel
     {
         private const string PanelName = "CompanionProgress";
-        private const float GapFromCard = 18f, ScreenMargin = 12f;
+        private const float GapFromCard = 18f, ScreenMargin = 40f;
         private const int RelicMaxPoints = 16, StripFilterTarget = 15;
 
         private static void Postfix(MapEquipUIChecklist __instance)
@@ -33,7 +33,14 @@ namespace CupheadCompanion
                 float rowFont = 22f;
                 var items = Traverse.Create(__instance).Field("checklistItems").GetValue<List<MapEquipUIChecklistItem>>();
                 if (items != null && items.Count > 0 && items[0] != null && items[0].descriptionText != null)
-                    rowFont = Mathf.Clamp(items[0].descriptionText.fontSize * 0.8f, 12f, 40f);
+                {
+                    // Use the row's designed font size. Its current size is no good as a reference: the game
+                    // shrinks it to fit long names (and never restores it), which made this card change size
+                    // the first time you switched tabs.
+                    float designed = Traverse.Create(items[0]).Field("originalFontSize").GetValue<float>();
+                    if (designed <= 0f) designed = items[0].descriptionText.fontSize;
+                    rowFont = Mathf.Clamp(designed * 0.7f, 12f, 40f);
+                }
 
                 RectTransform panel = CardBuilder.Build(__instance.transform, __instance.gameObject.layer,
                     "PROGRESS", Rows(), Mathf.Round(rowFont * 1.2f), Mathf.Round(rowFont));
