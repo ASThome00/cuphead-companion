@@ -11,7 +11,7 @@ namespace CupheadCompanion
     internal static class ProgressPanel
     {
         private const string PanelName = "CompanionProgress";
-        private const float GapFromCard = 18f, ScreenMargin = 40f;
+        private const float GapFromCard = 18f, ScreenMargin = 12f;
         private const int RelicMaxPoints = 16, StripFilterTarget = 15;
 
         private static void Postfix(MapEquipUIChecklist __instance)
@@ -53,9 +53,12 @@ namespace CupheadCompanion
                 float rightEdge = card.min.x - GapFromCard;
                 panel.anchoredPosition = new Vector2(rightEdge, card.center.y) - pivotOffset;
 
-                float room = rightEdge - ScreenLeft(__instance.transform) - ScreenMargin;
-                float width = panel.sizeDelta.x;
-                if (room > 40f && width > room) panel.localScale = Vector3.one * (room / width);
+                // The fit depends on where the card is on screen, and this runs while the card is still
+                // animating in, so it is re-checked every frame rather than decided once here.
+                var fitter = panel.gameObject.AddComponent<ProgressPanelFitter>();
+                fitter.rightEdge = rightEdge;
+                fitter.margin = ScreenMargin;
+                fitter.Fit();
             }
             catch (Exception e) { Plugin.Log.LogError("Progress panel failed: " + e); }
         }
@@ -68,7 +71,7 @@ namespace CupheadCompanion
         }
 
         // Left edge of the screen in the checklist's local space.
-        private static float ScreenLeft(Transform checklist)
+        internal static float ScreenLeft(Transform checklist)
         {
             Canvas canvas = checklist.GetComponentInParent<Canvas>();
             if (canvas == null) return float.NegativeInfinity;
@@ -123,6 +126,27 @@ namespace CupheadCompanion
         private static void Add(List<KeyValuePair<string, string>> rows, string label, string value)
         {
             rows.Add(new KeyValuePair<string, string>(label, value));
+        }
+    }
+
+    // Shrinks the progress card only when the screen edge leaves too little room for it at full size.
+    internal class ProgressPanelFitter : MonoBehaviour
+    {
+        internal float rightEdge, margin;
+
+        private void LateUpdate()
+        {
+            Fit();
+        }
+
+        internal void Fit()
+        {
+            Transform checklist = transform.parent;
+            if (checklist == null) return;
+            float width = ((RectTransform)transform).sizeDelta.x;
+            float room = rightEdge - ProgressPanel.ScreenLeft(checklist) - margin;
+            float scale = room > 40f && width > room ? room / width : 1f;
+            if (!Mathf.Approximately(transform.localScale.x, scale)) transform.localScale = Vector3.one * scale;
         }
     }
 }
