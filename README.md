@@ -56,9 +56,6 @@ Delete the `BepInEx\plugins\CupheadCompanion` folder. To remove the mod loader a
 `BepInEx` folder, `winhttp.dll`, `doorstop_config.ini`, `.doorstop_version` and `changelog.txt` from
 the Cuphead folder.
 
-When a Run 'n Gun stops being a pacifist run, the mod notes which enemy died in
-`BepInEx\LogOutput.log`, which helps when a P grade doesn't show up.
-
 ## Known limits
 
 - Card labels are in English in every game language. Level names follow the game's language.

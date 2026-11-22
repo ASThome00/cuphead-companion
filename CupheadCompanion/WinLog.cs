@@ -64,8 +64,6 @@ namespace CupheadCompanion
                     r.newBestTime = r.newBestGrade || (r.grade == r.prevGrade && r.time < r.prevTime);
                 }
                 Last = r;
-                if (__instance.LevelType == Level.Type.Platforming)
-                    Plugin.Log.LogInfo("Run 'n Gun finished: pacifist=" + Level.ScoringData.pacifistRun + ", Djimmi wish used=" + Level.ScoringData.usedDjimmi + ", grade=" + r.grade);
                 if (Plugin.WinLog.Value) WinLogFile.Append(r);
             }
             catch (Exception e) { Plugin.Log.LogError("Win capture (after) failed: " + e); }
