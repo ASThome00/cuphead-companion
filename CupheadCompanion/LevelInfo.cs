@@ -34,8 +34,38 @@ namespace CupheadCompanion
                 string name = i < ChampionNames.Length ? ChampionNames[i] : Level.kingOfGamesLevels[i].ToString().ToUpper();
                 info.Add(name, data.completed ? Grades[(int)data.grade] + "   " + FormatTime(data.bestTime) : "NOT BEATEN");
             }
-            info.Add("GAUNTLET", PlayerData.Data.GetLevelData(Levels.ChessCastle).completed ? "BEATEN" : "NOT BEATEN");
+            bool? gauntlet = GauntletBeaten();
+            if (gauntlet.HasValue) info.Add("GAUNTLET", gauntlet.Value ? "BEATEN" : "NOT BEATEN");
             return info;
+        }
+
+        // The save never marks the gauntlet as beaten: the game only awards the Steam achievement for it.
+        // So ask Steam, through reflection so the mod still loads on copies of the game without Steam.
+        // Returns null when that can't be answered, and the card then leaves the line out.
+        private static bool? GauntletBeaten()
+        {
+            try
+            {
+                if (PlayerData.Data.GetLevelData(Levels.ChessCastle).completed) return true;
+                Type stats = null;
+                foreach (System.Reflection.Assembly a in AppDomain.CurrentDomain.GetAssemblies())
+                {
+                    stats = a.GetType("Steamworks.SteamUserStats", false);
+                    if (stats != null) break;
+                }
+                if (stats == null) return null;
+                System.Reflection.MethodInfo get = stats.GetMethod("GetAchievement",
+                    new[] { typeof(string), typeof(bool).MakeByRefType() });
+                if (get == null) return null;
+                object[] args = { OnlineAchievementData.DLC.DefeatKOGGauntlet, false };
+                if (!(bool)get.Invoke(null, args)) return null;
+                return (bool)args[1];
+            }
+            catch (Exception e)
+            {
+                Plugin.Log.LogWarning("Could not read the gauntlet achievement: " + e.Message);
+                return null;
+            }
         }
 
         public static bool IsTracked(Levels level)

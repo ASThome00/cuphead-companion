@@ -11,7 +11,7 @@ namespace CupheadCompanion
     // Vanilla-friendly helper mod: quality-of-life additions in the game's own style.
     // It never changes combat, difficulty, grades or save data. Every feature has its own on/off setting
     // in BepInEx\config\cuphead.companion.cfg.
-    [BepInPlugin(Guid, "Cuphead Companion", "1.1.0")]
+    [BepInPlugin(Guid, "Cuphead Companion", "1.1.1")]
     public class Plugin : BaseUnityPlugin
     {
         public const string Guid = "cuphead.companion";

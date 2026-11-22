@@ -14,7 +14,7 @@
     <TargetFramework>net35</TargetFramework>
     <AssemblyName>CupheadCompanion</AssemblyName>
     <RootNamespace>CupheadCompanion</RootNamespace>
-    <Version>1.1.0</Version>
+    <Version>1.1.1</Version>
     <LangVersion>latest</LangVersion>
     <Nullable>disable</Nullable>
     <GameDir Condition="'$(GameDir)' == '' And '$(CUPHEAD_DIR)' != ''">$(CUPHEAD_DIR)</GameDir>
