@@ -79,11 +79,18 @@ namespace CupheadCompanion
                 if (!platforming) info.Add("DIFFICULTY", DifficultyName(data.difficultyBeaten));
             }
             info.Add("MS. CHALICE", data.completedAsChaliceP1 || data.completedAsChaliceP2 ? "YES" : "NO");
-            if (CountsForRelic(level)) info.Add("CURSED RELIC", data.curseCharmP1 || data.curseCharmP2 ? "YES" : "NO");
+            if (CountsForRelic(level))
+            {
+                // If beating it with the relic would still power the relic up, say how much it is worth.
+                float worth = RelicInfo.PointsAvailable(level);
+                string relic = data.curseCharmP1 || data.curseCharmP2 ? "YES"
+                    : worth > 0f ? "WORTH " + RelicInfo.Format(worth) : "NO";
+                info.Add("CURSED RELIC", relic);
+            }
             return info;
         }
 
-        private void Add(string label, string value)
+        internal void Add(string label, string value)
         {
             Rows.Add(new KeyValuePair<string, string>(label, value));
         }

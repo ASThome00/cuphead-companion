@@ -7,7 +7,7 @@ using UnityEngine.UI;
 namespace CupheadCompanion
 {
     // Builds a titled two-column card in the style of the game's own "ENTER" prompt bubble on the map
-    // (same background sprite, font and colours). Used by the map popup and the progress panel.
+    // (same background sprite, font and colors). Used by the map popup and the progress panel.
     internal static class CardBuilder
     {
         private const float PadX = 16f, PadY = 12f, RowGap = 4f, ColumnGap = 28f, TitleGap = 8f;

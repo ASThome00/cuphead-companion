@@ -11,12 +11,12 @@ namespace CupheadCompanion
     // Vanilla-friendly helper mod: quality-of-life additions in the game's own style.
     // It never changes combat, difficulty, grades or save data. Every feature has its own on/off setting
     // in BepInEx\config\cuphead.companion.cfg.
-    [BepInPlugin(Guid, "Cuphead Companion", "1.0.0")]
+    [BepInPlugin(Guid, "Cuphead Companion", "1.1.0")]
     public class Plugin : BaseUnityPlugin
     {
         public const string Guid = "cuphead.companion";
         internal static ManualLogSource Log;
-        internal static ConfigEntry<bool> SkipIntro, MapPopup, ChecklistIcons, ProgressPanel, ResultsTopTime, WinLog, FastRetry;
+        internal static ConfigEntry<bool> SkipIntro, MapPopup, ChecklistIcons, ProgressPanel, ResultsTopTime, WinLog, FastRetry, PoolRecordCard;
 
         private void Awake()
         {
@@ -28,13 +28,15 @@ namespace CupheadCompanion
             ChecklistIcons = Config.Bind("Info", "ChecklistIcons", true,
                 "Show Astral Cookie and relic icons on checklist rows beaten as Ms. Chalice or with the Cursed Relic.");
             ProgressPanel = Config.Bind("Info", "ChecklistProgressPanel", true,
-                "Show relic power and filter / recolour unlock progress on a card beside the equip menu's checklist.");
+                "Show relic power and filter / recolor unlock progress on a card beside the equip menu's checklist.");
             ResultsTopTime = Config.Bind("Info", "ResultsTopTime", true,
                 "On the results screen, show your previous top time under the top grade and say when you beat it.");
             WinLog = Config.Bind("Tracker", "LogWins", false,
                 "Off by default. Record every win (level, grade, time, who was playing) as one line of JSON in %LOCALAPPDATA%\\CupheadCompanion\\wins.jsonl, for your own stats tools. Nothing is sent anywhere.");
             FastRetry = Config.Bind("Helpers", "FastRetry", false,
                 "Changes pacing, so off by default: press confirm as soon as YOU DIED appears to retry at once, without waiting for the death card.");
+            PoolRecordCard = Config.Bind("Info", "PoolRecordCard", true,
+                "Show a card with your totals (deaths, bosses beaten, A ranks, completion and more) while you stand at the reflecting pool.");
             new Harmony(Guid).PatchAll();
             Logger.LogInfo("Cuphead Companion loaded");
         }

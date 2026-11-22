@@ -13,11 +13,17 @@ namespace CupheadCompanion
         private Vector2 offset;
         private float scale;
         private bool closing;
+        private bool beside;
 
         public static LevelPopup Create(Levels level, Transform target, Vector2 dialogueOffset)
         {
+            return Create(LevelInfo.For(level), target, dialogueOffset, false);
+        }
+
+        // `beside` puts the card next to the player instead of above the prompt, for places with no prompt.
+        public static LevelPopup Create(LevelInfo info, Transform target, Vector2 dialogueOffset, bool beside)
+        {
             Canvas canvas = MapUI.Current.sceneCanvas;
-            LevelInfo info = LevelInfo.For(level);
             float titleSize = CardBuilder.PromptFontSize;
             RectTransform card = CardBuilder.Build(canvas.transform, canvas.gameObject.layer, info.Title, info.Rows,
                 titleSize, Mathf.Round(titleSize * 0.8f));
@@ -27,6 +33,7 @@ namespace CupheadCompanion
             var popup = card.gameObject.AddComponent<LevelPopup>();
             popup.target = target;
             popup.offset = dialogueOffset;
+            popup.beside = beside;
             card.localScale = Vector3.zero;
             popup.UpdatePosition();
             return popup;
@@ -65,7 +72,7 @@ namespace CupheadCompanion
                 Vector2 c = cam.transform.position;
                 float top = c.y + halfH - margin, bottom = c.y - halfH + margin;
                 float left = c.x - halfW + margin, right = c.x + halfW - margin;
-                if (p.y + size.y > top)
+                if (beside || p.y + size.y > top)
                 {
                     float side = SideGap * unitsPerPixel + size.x / 2f;
                     p.x = prompt.x + side + size.x / 2f <= right ? prompt.x + side : prompt.x - side;

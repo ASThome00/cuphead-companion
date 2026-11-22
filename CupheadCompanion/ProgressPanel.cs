@@ -12,7 +12,7 @@ namespace CupheadCompanion
     {
         private const string PanelName = "CompanionProgress";
         private const float GapFromCard = 18f, ScreenMargin = 12f;
-        private const int RelicMaxPoints = 16, StripFilterTarget = 15;
+        private const int RelicMaxPoints = 16, StripFilterTarget = 15, BaseCoins = 40, DlcCoins = 16;
 
         private static void Postfix(MapEquipUIChecklist __instance)
         {
@@ -101,6 +101,10 @@ namespace CupheadCompanion
                 Add(rows, "RELIC POWER", points + " OF " + RelicMaxPoints);
             }
 
+            // Hidden coins found: 40 in the base game, 16 more with the DLC.
+            int coinTotal = DLCManager.DLCEnabled() ? BaseCoins + DlcCoins : BaseCoins;
+            Add(rows, "COINS FOUND", Mathf.Min(data.NumCoinsCollected, coinTotal) + " OF " + coinTotal);
+
             // 2-Strip filter: A- or better on any 15 base-game bosses or Run 'n Guns.
             int aRanks = 0;
             foreach (Levels[] set in new[] { Level.world1BossLevels, Level.world2BossLevels, Level.world3BossLevels,
@@ -114,7 +118,7 @@ namespace CupheadCompanion
             Add(rows, "B AND W FILTER", data.unlockedBlackAndWhite ? "UNLOCKED"
                 : pRuns + " OF " + Level.platformingLevels.Length);
 
-            // Ms. Chalice recolour: every boss on the game's list beaten as Ms. Chalice by player one.
+            // Ms. Chalice recolor: every boss on the game's list beaten as Ms. Chalice by player one.
             int asChalice = 0;
             foreach (Levels l in Level.chaliceLevels)
                 if (data.GetLevelData(l).completedAsChaliceP1) asChalice++;

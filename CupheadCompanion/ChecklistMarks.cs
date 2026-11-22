@@ -13,6 +13,7 @@ namespace CupheadCompanion
     internal static class ChecklistMarks
     {
         private const string ContainerName = "CompanionMarks";
+        private const string WorthName = "RelicWorth";
         private const float GapAfterName = 5f, GapBetween = 3f, DotsPadding = 5f, SizeFactor = 1.3f;
         // Capital letters reach roughly 3/4 of the way from the baseline to the font's ascender line.
         private const float CapCentre = 0.38f;
@@ -35,7 +36,9 @@ namespace CupheadCompanion
             PlayerData.PlayerLevelDataObject data = PlayerData.Data.GetLevelData(level);
             bool chalice = data.played && (data.completedAsChaliceP1 || data.completedAsChaliceP2);
             bool relic = data.played && (data.curseCharmP1 || data.curseCharmP2);
-            if (!Plugin.ChecklistIcons.Value || item.isDicePalaceMiniBoss || (!chalice && !relic))
+            // Relic points this level would still give, shown as "+3" after the icons.
+            float worth = data.played && !relic ? RelicInfo.PointsAvailable(level) : 0f;
+            if (!Plugin.ChecklistIcons.Value || item.isDicePalaceMiniBoss || (!chalice && !relic && worth <= 0f))
             {
                 if (existing != null) existing.gameObject.SetActive(false);
                 return;
@@ -61,6 +64,7 @@ namespace CupheadCompanion
             }
             x = Place(container.GetChild(0), chaliceSprite, chalice, x, y, size);
             x = Place(container.GetChild(1), relicSprite, relic, x, y, size);
+            x = PlaceWorth(container, item, worth, x, y);
 
             // The game filled the rest of the line with leader dots; trim them so they don't run under the icons.
             Text dots = item.leaderDotText;
@@ -84,6 +88,42 @@ namespace CupheadCompanion
             var rt = (RectTransform)child;
             rt.sizeDelta = new Vector2(width, size);
             rt.anchoredPosition = new Vector2(x, y);
+            return x + width + GapBetween;
+        }
+
+        // A small "+3" in the checklist's own grade font, copied from the row's grade text.
+        private static float PlaceWorth(RectTransform container, MapEquipUIChecklistItem item, float worth, float x, float y)
+        {
+            Transform existing = container.Find(WorthName);
+            if (worth <= 0f || item.gradeText == null)
+            {
+                if (existing != null) existing.gameObject.SetActive(false);
+                return x;
+            }
+            Text text;
+            if (existing != null) text = existing.GetComponent<Text>();
+            else
+            {
+                GameObject copy = UnityEngine.Object.Instantiate(item.gradeText.gameObject, container);
+                copy.name = WorthName;
+                foreach (LocalizationHelper helper in copy.GetComponentsInChildren<LocalizationHelper>(true))
+                    UnityEngine.Object.DestroyImmediate(helper);
+                text = copy.GetComponent<Text>();
+                text.raycastTarget = false;
+                text.alignment = TextAnchor.MiddleLeft;
+                text.horizontalOverflow = HorizontalWrapMode.Overflow;
+                text.verticalOverflow = VerticalWrapMode.Overflow;
+                text.fontSize = Mathf.Max(8, Mathf.RoundToInt(item.gradeText.fontSize * 0.7f));
+                Color c = text.color; c.a = 0.75f; text.color = c;
+                RectTransform rt = text.rectTransform;
+                rt.anchorMin = new Vector2(0.5f, 0.5f); rt.anchorMax = new Vector2(0.5f, 0.5f); rt.pivot = new Vector2(0f, 0.5f);
+                rt.localScale = Vector3.one;
+            }
+            text.gameObject.SetActive(true);
+            text.text = "+" + RelicInfo.Format(worth);
+            float width = text.preferredWidth;
+            text.rectTransform.sizeDelta = new Vector2(width, text.preferredHeight);
+            text.rectTransform.anchoredPosition = new Vector2(x, y);
             return x + width + GapBetween;
         }
 
